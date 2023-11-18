@@ -6,7 +6,6 @@ mod templates;
 
 use axum::{routing::get, Router};
 
-use std::net::SocketAddr;
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -26,10 +25,12 @@ pub async fn run() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
+    let port = std::env::var("PORT").unwrap_or(String::from("3000"));
+
+    let addr = format!("0.0.0.0:{}", port);
     tracing::debug!("listening on {}", addr);
 
-    axum::Server::bind(&addr)
+    axum::Server::bind(&addr.parse().unwrap())
         .serve(app().into_make_service())
         .await
         .unwrap();
