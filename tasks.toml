@@ -1,5 +1,0 @@
-[tasks.server]
-command = ["make", "server-watch"]
-
-[tasks.tailwind]
-command = ["make", "tailwind-watch"]

@@ -1,26 +1,42 @@
 use crate::routes::index::get_index;
 
 mod error;
-mod routes;
+mod models;
+mod repository;
 mod templates;
+mod utils;
 
-use axum::{routing::get, Router};
+mod routes;
 
+use axum::{
+    routing::{get, post},
+    Router,
+};
+
+use models::SharedState;
+use routes::todos::post_todo;
+use tokio::net::TcpListener;
 use tower_http::{services::ServeDir, trace::TraceLayer};
+use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 pub fn app() -> Router {
+    let state = SharedState::default();
+    let htmx_routes = Router::new().route("/todo", post(post_todo));
+
     Router::new()
         .nest_service("/assets", ServeDir::new("assets"))
         .route("/", get(get_index))
+        .nest("/htmx-api", htmx_routes)
         .layer(TraceLayer::new_for_http())
+        .with_state(state)
 }
 
 pub async fn run() {
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "rust_axum_tailwind_htmx_todo=debug,tower_http=debug".into()),
+                .unwrap_or_else(|_| "rust-askama-htmx-tailwind-todo=debug,tower_http=debug".into()),
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
@@ -28,10 +44,8 @@ pub async fn run() {
     let port = std::env::var("PORT").unwrap_or(String::from("3000"));
 
     let addr = format!("0.0.0.0:{}", port);
-    tracing::debug!("listening on {}", addr);
+    info!("listening on {}", addr);
 
-    axum::Server::bind(&addr.parse().unwrap())
-        .serve(app().into_make_service())
-        .await
-        .unwrap();
+    let listener = TcpListener::bind(addr).await.unwrap();
+    axum::serve(listener, app()).await.unwrap();
 }
