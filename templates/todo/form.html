@@ -1,13 +1,13 @@
 <form
   hx-post="/htmx-api/todo"
-  hx-target="#todos"
+  hx-target="#todo-list"
   hx-swap="innerHTML"
   class="max-w-md"
 >
   <label for="todo" class="block text-sm font-medium leading-6 text-gray-900"
     >Todo</label
   >
-  <div class="mt-2 inline-flex flex-row space-x-2">
+  <div class="inline-flex flex-row mt-2 space-x-2">
     <input
       type="text"
       name="text"
@@ -24,4 +24,3 @@
   </div>
 </form>
 
-<div id="todos"></div>

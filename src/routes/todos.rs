@@ -7,6 +7,15 @@ use crate::{
 use anyhow::Result;
 use axum::{extract::State, Form};
 
+pub async fn get_todos(
+    State(shared_state): State<SharedState>,
+) -> Result<ListTodoResponse, AppError> {
+    let state = shared_state.write().unwrap();
+    Ok(ListTodoResponse {
+        todos: state.todos.to_vec(),
+    })
+}
+
 pub async fn post_todo(
     State(shared_state): State<SharedState>,
     Form(todo): Form<TodoRequest>,

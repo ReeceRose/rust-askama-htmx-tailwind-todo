@@ -5,7 +5,12 @@
  
 {% block content %}
 <div class="inline-flex flex-row space-x-2">
-  <h1 class="text-blue-500 text-2xl">Todo Application</h1>
+  <h1 class="text-2xl text-blue-500">Todo Application</h1>
 </div>
 {% include "todo/form.html" %}
+
+<div id="todo-list" hx-get="/htmx-api/todo" hx-target="this" hx-trigger="load" hx-swap="outerHTML">
+	Loading...
+</div>
+
 {% endblock %}

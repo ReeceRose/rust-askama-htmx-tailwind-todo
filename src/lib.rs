@@ -14,7 +14,7 @@ use axum::{
 };
 
 use models::SharedState;
-use routes::todos::post_todo;
+use routes::todos::{post_todo, get_todos};
 use tokio::net::TcpListener;
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing::info;
@@ -22,7 +22,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 pub fn app() -> Router {
     let state = SharedState::default();
-    let htmx_routes = Router::new().route("/todo", post(post_todo));
+    let htmx_routes = Router::new().route("/todo", get(get_todos).post(post_todo));
 
     Router::new()
         .nest_service("/assets", ServeDir::new("assets"))
