@@ -8,7 +8,7 @@ use crate::utils::get_timestamp;
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Todo {
     created: u128,
-    updated: u128,
+    pub updated: u128,
     pub id: Uuid,
     pub text: String,
     pub completed: bool,
@@ -24,13 +24,6 @@ impl Todo {
             text,
             completed: false,
         }
-    }
-
-    pub fn complete(mut self) -> Self {
-        let timestamp = get_timestamp();
-        self.completed = true;
-        self.updated = timestamp;
-        self
     }
 }
 

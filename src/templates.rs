@@ -14,4 +14,4 @@ pub struct ListTodoResponse {
 }
 #[derive(Template)]
 #[template(source = "", ext = "")]
-pub struct DeleteTodoResponse {}
+pub struct EmptyResponse {}

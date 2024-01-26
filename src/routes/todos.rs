@@ -1,7 +1,8 @@
 use crate::{
     error::AppError,
     models::{SharedState, Todo, TodoRequest},
-    templates::{DeleteTodoResponse, ListTodoResponse},
+    templates::{EmptyResponse, ListTodoResponse},
+    utils::get_timestamp,
 };
 
 use anyhow::Result;
@@ -33,7 +34,7 @@ pub async fn post_todo(
 pub async fn delete_todo(
     Path(id): Path<String>,
     State(shared_state): State<SharedState>,
-) -> Result<DeleteTodoResponse, AppError> {
+) -> Result<EmptyResponse, AppError> {
     let mut state = shared_state.write().unwrap();
     let index = state
         .todos
@@ -43,7 +44,31 @@ pub async fn delete_todo(
         Some(index) => {
             state.todos.remove(index);
         }
-        None => (),
+        None => {
+            println!("failed to get todo by id, return some error")
+        }
     };
-    Ok(DeleteTodoResponse {})
+    Ok(EmptyResponse {})
+}
+
+pub async fn toggle_todo(
+    Path(id): Path<String>,
+    State(shared_state): State<SharedState>,
+) -> Result<EmptyResponse, AppError> {
+    let mut state = shared_state.write().unwrap();
+    let index = state
+        .todos
+        .iter()
+        .position(|todo| todo.id.to_string() == id);
+    match index {
+        Some(index) => {
+            let todo = state.todos.get_mut(index).unwrap();
+            todo.completed = !todo.completed;
+            todo.updated = get_timestamp();
+        }
+        None => {
+            println!("failed to get todo by id, return some error")
+        }
+    };
+    Ok(EmptyResponse {})
 }

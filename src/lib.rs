@@ -14,7 +14,7 @@ use axum::{
 };
 
 use models::SharedState;
-use routes::todos::{delete_todo, get_todos, post_todo};
+use routes::todos::{delete_todo, get_todos, post_todo, toggle_todo};
 use tokio::net::TcpListener;
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing::info;
@@ -24,7 +24,7 @@ pub fn app() -> Router {
     let state = SharedState::default();
     let htmx_routes = Router::new()
         .route("/todo", get(get_todos).post(post_todo))
-        .route("/todo/:id", delete(delete_todo));
+        .route("/todo/:id", delete(delete_todo).patch(toggle_todo));
 
     Router::new()
         .nest_service("/assets", ServeDir::new("assets"))

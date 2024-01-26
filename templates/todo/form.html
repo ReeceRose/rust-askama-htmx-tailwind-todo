@@ -1,4 +1,5 @@
 <form
+  hx-on="htmx:after-request: this.reset()"
   hx-post="/htmx-api/todo"
   hx-target="#todo-list"
   hx-swap="innerHTML"
