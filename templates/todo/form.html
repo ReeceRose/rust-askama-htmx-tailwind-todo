@@ -4,23 +4,18 @@
   hx-swap="innerHTML"
   class="max-w-md"
 >
-  <label for="todo" class="block text-sm font-medium leading-6 text-gray-900"
-    >Todo</label
-  >
-  <div class="inline-flex flex-row mt-2 space-x-2">
+  <div class="flex items-center gap-2 mb-4">
     <input
-      type="text"
-      name="text"
       id="todo"
-      class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-      placeholder=""
-    />
-    <button
+      name="text"
+      type="text"
+      class="flex w-full h-10 px-3 py-2 text-sm border rounded-md border-input bg-background ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-neutral-700 dark:text-white"
+      placeholder="Add a new task"
+    /><button
       type="submit"
-      class="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+      class="inline-flex items-center justify-center h-10 px-4 py-2 text-sm font-medium transition-colors rounded-md whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-neutral-700 dark:text-white"
     >
       Add
     </button>
   </div>
 </form>
-

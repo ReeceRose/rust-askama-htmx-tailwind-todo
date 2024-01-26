@@ -4,13 +4,25 @@
 {% block title %}Todo Application{% endblock %}
  
 {% block content %}
-<div class="inline-flex flex-row space-x-2">
-  <h1 class="text-2xl text-blue-500">Todo Application</h1>
-</div>
-{% include "todo/form.html" %}
 
-<div id="todo-list" hx-get="/htmx-api/todo" hx-target="this" hx-trigger="load" hx-swap="outerHTML">
-	Loading...
+<div class="flex flex-col h-screen dark:bg-neutral-900">
+  <header
+    class="flex items-center px-6 border-b h-14 bg-neutral-100/40 dark:bg-neutral-800/40"
+  >
+    <h1 class="text-lg font-semibold dark:text-white">Todo List</h1>
+  </header>
+  <main class="flex-1 p-6 dark:bg-neutral-800">
+    {% include "todo/form.html" %}
+    <div
+      id="todo-list"
+      hx-get="/htmx-api/todo"
+      hx-target="this"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+      class="dark:text-white"
+    >
+      Loading...
+    </div>
+  </main>
 </div>
-
 {% endblock %}

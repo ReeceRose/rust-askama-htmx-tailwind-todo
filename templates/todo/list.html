@@ -1,5 +1,38 @@
-<table id="todo-list">
-{% for todo in todos %}
-  <p class="text-lg">{{ todo.text }}</p>
-{% endfor %}
-</table>
+<div id="todo-list">
+  <ul class="space-y-2">
+    {% for todo in todos %}
+    <li class="flex items-center gap-2 dark:text-white">
+      <input
+        type="checkbox"
+        role="checkbox"
+        aria-checked="false"
+        data-state="unchecked"
+        value="on"
+        class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:text-gray-300"
+      ></input
+      ><label class="flex-1"> {{ todo.text }} </label>
+      <button
+        class="inline-flex items-center justify-center w-10 h-10 text-sm font-medium transition-colors border rounded-md whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-input bg-background hover:bg-accent hover:text-accent-foreground dark:text-gray-300"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="w-4 h-4"
+        >
+          <path d="M3 6h18"></path>
+          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+        </svg>
+        <span class="sr-only">Delete task</span>
+      </button>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
