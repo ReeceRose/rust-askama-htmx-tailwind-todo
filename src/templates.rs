@@ -12,3 +12,6 @@ pub struct GetIndexResponse;
 pub struct ListTodoResponse {
     pub todos: Vec<Todo>,
 }
+#[derive(Template)]
+#[template(source = "", ext = "")]
+pub struct DeleteTodoResponse {}

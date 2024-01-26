@@ -1,7 +1,7 @@
 <div id="todo-list">
   <ul class="space-y-2">
     {% for todo in todos %}
-    <li class="flex items-center gap-2 dark:text-white">
+    <li class="flex items-center gap-2 dark:text-white" id="todo-{{todo.id}}">
       <input
         type="checkbox"
         role="checkbox"
@@ -12,6 +12,9 @@
       ></input
       ><label class="flex-1"> {{ todo.text }} </label>
       <button
+        hx-delete="/htmx-api/todo/{{todo.id}}"
+        hx-target="#todo-{{todo.id}}"
+        hx-swap="outerHTML"
         class="inline-flex items-center justify-center w-10 h-10 text-sm font-medium transition-colors border rounded-md whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-input bg-background hover:bg-accent hover:text-accent-foreground dark:text-gray-300"
       >
         <svg

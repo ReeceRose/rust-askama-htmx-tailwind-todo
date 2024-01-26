@@ -9,12 +9,12 @@ mod utils;
 mod routes;
 
 use axum::{
-    routing::{get, post},
+    routing::{delete, get},
     Router,
 };
 
 use models::SharedState;
-use routes::todos::{post_todo, get_todos};
+use routes::todos::{delete_todo, get_todos, post_todo};
 use tokio::net::TcpListener;
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing::info;
@@ -22,7 +22,9 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 pub fn app() -> Router {
     let state = SharedState::default();
-    let htmx_routes = Router::new().route("/todo", get(get_todos).post(post_todo));
+    let htmx_routes = Router::new()
+        .route("/todo", get(get_todos).post(post_todo))
+        .route("/todo/:id", delete(delete_todo));
 
     Router::new()
         .nest_service("/assets", ServeDir::new("assets"))
