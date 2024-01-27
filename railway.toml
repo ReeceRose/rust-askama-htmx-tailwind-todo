@@ -1,6 +1,5 @@
 [build]
-builder = "nixpacks"
-buildCommand = "cargo build --release"
+builder = "Dockerfile"
 
 [deploy]
 restartPolicyType = "ON_FAILURE"
