@@ -1,6 +1,7 @@
 use crate::{
     error::AppError,
-    models::{SharedState, Todo, TodoRequest},
+    models::TodoRequest,
+    service::todo::{TodoService, TodoServiceImpl},
     templates::{EmptyResponse, ListTodoResponse},
     utils::get_timestamp,
 };
@@ -12,63 +13,38 @@ use axum::{
 };
 
 pub async fn get_todos(
-    State(shared_state): State<SharedState>,
+    State(todo_service): State<TodoServiceImpl>,
 ) -> Result<ListTodoResponse, AppError> {
-    let state = shared_state.write().unwrap();
-    Ok(ListTodoResponse {
-        todos: state.todos.to_vec(),
-    })
+    let todos = todo_service.all().await.unwrap();
+    Ok(ListTodoResponse { todos })
 }
 
 pub async fn post_todo(
-    State(shared_state): State<SharedState>,
+    State(mut todo_service): State<TodoServiceImpl>,
     Form(todo): Form<TodoRequest>,
 ) -> Result<ListTodoResponse, AppError> {
-    let mut state = shared_state.write().unwrap();
-    state.todos.push(Todo::new(todo.text));
-    Ok(ListTodoResponse {
-        todos: state.todos.to_vec(),
-    })
+    // let mut state = shared_state.write().unwrap();
+    todo_service.create(todo.text).await;
+    let todos = todo_service.all().await.unwrap();
+    Ok(ListTodoResponse { todos })
 }
 
 pub async fn delete_todo(
     Path(id): Path<String>,
-    State(shared_state): State<SharedState>,
+    State(todo_service): State<TodoServiceImpl>,
 ) -> Result<EmptyResponse, AppError> {
-    let mut state = shared_state.write().unwrap();
-    let index = state
-        .todos
-        .iter()
-        .position(|todo| todo.id.to_string() == id);
-    match index {
-        Some(index) => {
-            state.todos.remove(index);
-        }
-        None => {
-            println!("failed to get todo by id, return some error")
-        }
-    };
+    todo_service.delete(id).await;
     Ok(EmptyResponse {})
 }
 
 pub async fn toggle_todo(
     Path(id): Path<String>,
-    State(shared_state): State<SharedState>,
+    State(todo_service): State<TodoServiceImpl>,
 ) -> Result<EmptyResponse, AppError> {
-    let mut state = shared_state.write().unwrap();
-    let index = state
-        .todos
-        .iter()
-        .position(|todo| todo.id.to_string() == id);
-    match index {
-        Some(index) => {
-            let todo = state.todos.get_mut(index).unwrap();
-            todo.completed = !todo.completed;
-            todo.updated = get_timestamp();
-        }
-        None => {
-            println!("failed to get todo by id, return some error")
-        }
-    };
+    let mut todo = todo_service.get(id).await.unwrap();
+    todo.completed = !todo.completed;
+    todo.updated = get_timestamp();
+    todo_service.update(&todo).await.unwrap();
+
     Ok(EmptyResponse {})
 }

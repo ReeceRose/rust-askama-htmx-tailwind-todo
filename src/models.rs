@@ -32,7 +32,6 @@ pub struct TodoRequest {
     pub text: String,
 }
 
-// #[derive(Clone)]
 pub struct AppState {
     pub todos: Vec<Todo>, // pub todo_repo
 }

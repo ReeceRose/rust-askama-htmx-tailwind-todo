@@ -1,12 +1,13 @@
 use crate::routes::index::get_index;
 
+mod repository;
+mod routes;
+mod service;
+
 mod error;
 mod models;
-mod repository;
 mod templates;
 mod utils;
-
-mod routes;
 
 use axum::{
     routing::{delete, get},
@@ -14,14 +15,18 @@ use axum::{
 };
 
 use models::SharedState;
+use repository::todo::{Repo, TodoRepo};
 use routes::todos::{delete_todo, get_todos, post_todo, toggle_todo};
+use service::todo::{TodoService, TodoServiceImpl};
 use tokio::net::TcpListener;
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 pub fn app() -> Router {
-    let state = SharedState::default();
+    let todo_repo = TodoRepo::new(SharedState::default());
+    let todo_service = TodoServiceImpl::new(todo_repo);
+
     let htmx_routes = Router::new()
         .route("/todo", get(get_todos).post(post_todo))
         .route("/todo/:id", delete(delete_todo).patch(toggle_todo));
@@ -31,7 +36,7 @@ pub fn app() -> Router {
         .route("/", get(get_index))
         .nest("/htmx-api", htmx_routes)
         .layer(TraceLayer::new_for_http())
-        .with_state(state)
+        .with_state(todo_service)
 }
 
 pub async fn run() {
