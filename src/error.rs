@@ -2,7 +2,9 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
+use thiserror::Error;
 
+// TODO: refactor to remove error?
 // Make our own error that wraps `anyhow::Error`.
 pub struct AppError(anyhow::Error);
 
@@ -26,4 +28,16 @@ where
     fn from(err: E) -> Self {
         Self(err.into())
     }
+}
+
+#[derive(Error, Debug)]
+pub enum TodoError {
+    #[error("No")]
+    NotFound,
+    #[error("No")]
+    FailedToGetLock,
+    #[error("")]
+    FailedToUpdate,
+    #[error("")]
+    FailedToDelete,
 }
