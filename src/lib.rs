@@ -7,17 +7,11 @@ mod models;
 mod templates;
 mod utils;
 
-use axum::{
-    routing::{delete, get},
-    Router,
-};
+use axum::{routing::get, Router};
 
 use models::SharedState;
 use repository::todo::{Repo, TodoRepo};
-use routes::htmx::{
-    index::get_index,
-    todo::{delete_todo, get_todos, post_todo, toggle_todo},
-};
+use routes::htmx::index::{create_htmx_routes, get_index};
 use service::todo::{TodoService, TodoServiceImpl};
 use tokio::net::TcpListener;
 use tower_http::{services::ServeDir, trace::TraceLayer};
@@ -28,9 +22,7 @@ pub fn app() -> Router {
     let todo_repo = TodoRepo::new(SharedState::default());
     let todo_service = TodoServiceImpl::new(todo_repo);
 
-    let htmx_routes = Router::new()
-        .route("/todo", get(get_todos).post(post_todo))
-        .route("/todo/:id", delete(delete_todo).patch(toggle_todo));
+    let htmx_routes = create_htmx_routes();
 
     Router::new()
         .nest_service("/assets", ServeDir::new("assets"))
