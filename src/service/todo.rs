@@ -1,6 +1,7 @@
 use anyhow::Result;
 
 use crate::{
+    error::TodoError,
     models::Todo,
     repository::todo::{Repo, TodoRepo},
 };
@@ -13,53 +14,58 @@ pub struct TodoServiceImpl {
 // TODO: Refactor return types
 pub trait TodoService {
     fn new(repository: TodoRepo) -> Self; // TODO: borrow?
-    async fn all(&self) -> Result<Vec<Todo>, String>;
-    async fn get(&self, id: String) -> Result<Todo, String>;
-    async fn create(&mut self, text: String) -> Result<Todo, String>;
-    async fn update(&self, todo: &Todo) -> Result<Todo, String>;
-    async fn delete(&self, id: String) -> Result<bool, String>;
+    async fn all(&self) -> Result<Vec<Todo>, TodoError>;
+    async fn get(&self, id: String) -> Result<Todo, TodoError>;
+    async fn create(&mut self, text: String) -> Result<Todo, TodoError>;
+    async fn update(&self, todo: &Todo) -> Result<Todo, TodoError>;
+    async fn delete(&self, id: String) -> Result<bool, TodoError>;
 }
+
+// TODO: add some more logging
 
 impl TodoService for TodoServiceImpl {
     fn new(repository: TodoRepo) -> Self {
         Self { repository }
     }
 
-    async fn all(&self) -> Result<Vec<Todo>, String> {
+    async fn all(&self) -> Result<Vec<Todo>, TodoError> {
         let result = self.repository.all();
-        if let Ok(todos) = result {
-            return Ok(todos);
+        match result {
+            Ok(todos) => Ok(todos),
+            Err(_err) => Err(TodoError::FailedToGet),
         }
-        return Err("Failed to get todos".to_string());
     }
 
-    async fn get(&self, id: String) -> Result<Todo, String> {
+    async fn get(&self, id: String) -> Result<Todo, TodoError> {
         let result = self.repository.get(id);
-        if let Ok(todo) = result {
-            return Ok(todo);
+        match result {
+            Ok(todo) => Ok(todo),
+            Err(_err) => Err(TodoError::FailedToGet),
         }
-        return Err("failed to get todo".to_string());
     }
 
-    async fn create(&mut self, text: String) -> Result<Todo, String> {
+    async fn create(&mut self, text: String) -> Result<Todo, TodoError> {
         let todo = Todo::new(text);
         let result = self.repository.create(&todo);
-        if let Ok(todo) = result {
-            return Ok(todo);
+        match result {
+            Ok(todo) => Ok(todo),
+            Err(_err) => Err(TodoError::FailedToCreate),
         }
-        return Err("failed to create todo".to_string());
     }
 
-    async fn update(&self, todo: &Todo) -> Result<Todo, String> {
+    async fn update(&self, todo: &Todo) -> Result<Todo, TodoError> {
         let result = self.repository.update(todo);
-        if let Ok(_result) = result {
-            return Ok(todo.to_owned());
+        match result {
+            Ok(_updated) => Ok(todo.clone()),
+            Err(_err) => Err(TodoError::FailedToUpdate),
         }
-        return Err("failed to update todo".to_string());
     }
 
-    async fn delete(&self, id: String) -> Result<bool, String> {
-        let result = self.repository.delete(id).unwrap();
-        return Ok(result);
+    async fn delete(&self, id: String) -> Result<bool, TodoError> {
+        let result = self.repository.delete(id);
+        match result {
+            Ok(deleted) => Ok(deleted),
+            Err(_err) => Err(TodoError::FailedToDelete),
+        }
     }
 }

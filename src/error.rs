@@ -3,6 +3,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use thiserror::Error;
+use tokio::sync::oneshot::error;
 
 // TODO: refactor to remove error?
 // Make our own error that wraps `anyhow::Error`.
@@ -36,6 +37,10 @@ pub enum TodoError {
     NotFound,
     #[error("No")]
     FailedToGetLock,
+    #[error("")]
+    FailedToGet,
+    #[error("")]
+    FailedToCreate,
     #[error("")]
     FailedToUpdate,
     #[error("")]

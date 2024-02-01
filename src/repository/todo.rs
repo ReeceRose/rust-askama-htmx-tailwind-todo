@@ -45,10 +45,10 @@ impl Repo for TodoRepo {
 
     fn all(&self) -> Result<Vec<Todo>, TodoError> {
         let read_state = self.state.read();
-        return match read_state {
+        match read_state {
             Ok(state) => Ok(state.todos.clone()),
             Err(_err) => Err(TodoError::FailedToGetLock),
-        };
+        }
     }
 
     fn get(&self, id: String) -> Result<Todo, TodoError> {
@@ -56,7 +56,7 @@ impl Repo for TodoRepo {
         match index {
             Some(index) => {
                 let read_state = self.state.read();
-                return match read_state {
+                match read_state {
                     Ok(state) => {
                         if let Some(todo) = state.todos.get(index) {
                             return Ok(todo.clone());
@@ -64,7 +64,7 @@ impl Repo for TodoRepo {
                         return Err(TodoError::NotFound);
                     }
                     Err(_err) => Err(TodoError::FailedToGetLock),
-                };
+                }
             }
             None => Err(TodoError::NotFound),
         }
@@ -75,7 +75,7 @@ impl Repo for TodoRepo {
         return match write_state {
             Ok(mut state) => {
                 state.todos.push(todo.clone());
-                return Ok(todo.clone());
+                Ok(todo.clone())
             }
             Err(_err) => Err(TodoError::FailedToGetLock),
         };
@@ -84,7 +84,7 @@ impl Repo for TodoRepo {
     fn update(&self, todo: &Todo) -> Result<bool, TodoError> {
         let id = todo.to_owned().id.to_string();
         let index = self.get_index(id.to_owned());
-        return match index {
+        match index {
             Some(index) => {
                 let write_state = self.state.write();
                 if let Ok(mut state) = write_state {
@@ -94,12 +94,12 @@ impl Repo for TodoRepo {
                 return Err(TodoError::FailedToGetLock);
             }
             None => Err(TodoError::NotFound),
-        };
+        }
     }
 
     fn delete(&self, id: String) -> Result<bool, TodoError> {
         let index = self.get_index(id);
-        return match index {
+        match index {
             Some(index) => {
                 let write_state = self.state.write();
                 if let Ok(mut state) = write_state {
@@ -109,6 +109,6 @@ impl Repo for TodoRepo {
                 return Err(TodoError::NotFound);
             }
             None => Err(TodoError::NotFound),
-        };
+        }
     }
 }
