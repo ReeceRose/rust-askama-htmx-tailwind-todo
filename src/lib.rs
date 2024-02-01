@@ -1,5 +1,3 @@
-use crate::routes::index::get_index;
-
 mod repository;
 mod routes;
 mod service;
@@ -16,7 +14,10 @@ use axum::{
 
 use models::SharedState;
 use repository::todo::{Repo, TodoRepo};
-use routes::todos::{delete_todo, get_todos, post_todo, toggle_todo};
+use routes::htmx::{
+    index::get_index,
+    todo::{delete_todo, get_todos, post_todo, toggle_todo},
+};
 use service::todo::{TodoService, TodoServiceImpl};
 use tokio::net::TcpListener;
 use tower_http::{services::ServeDir, trace::TraceLayer};
