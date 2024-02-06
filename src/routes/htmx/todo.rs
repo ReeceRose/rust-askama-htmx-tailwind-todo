@@ -3,7 +3,10 @@ use crate::{
     service::todo::{TodoService, TodoServiceImpl},
     templates::{
         index::EmptyResponse,
-        todo::{ListTodoErrorResponse, ListTodoResponse},
+        todo::{
+            CreateTodoErrorResponse, DeleteTodoErrorResponse, ListTodoErrorResponse,
+            ListTodoResponse, ToggleTodoErrorResponse,
+        },
     },
     utils::get_timestamp,
 };
@@ -36,12 +39,20 @@ pub async fn post_todo(
     Form(todo): Form<TodoRequest>,
 ) -> impl IntoResponse {
     let result = todo_service.create(todo.text).await;
+
     match result {
         Ok(_todo) => {
             let todos = todo_service.all().await.unwrap();
             ListTodoResponse { todos }.into_response()
         }
-        Err(_err) => EmptyResponse {}.into_response(),
+        Err(err) => (
+            StatusCode::OK,
+            [("HX-Retarget", "#submit-error"), ("HX-Reswap", "innerHTML")],
+            CreateTodoErrorResponse {
+                error: err.to_string(),
+            },
+        )
+            .into_response(),
     }
 }
 
@@ -49,18 +60,47 @@ pub async fn delete_todo(
     Path(id): Path<String>,
     State(todo_service): State<TodoServiceImpl>,
 ) -> impl IntoResponse {
-    todo_service.delete(id).await;
-    EmptyResponse {}
+    let result = todo_service.delete(id).await;
+
+    match result {
+        Ok(_result) => (EmptyResponse {}).into_response(),
+        Err(err) => (
+            StatusCode::OK,
+            [("HX-Retarget", "#delete-error"), ("HX-Reswap", "innerHTML")],
+            DeleteTodoErrorResponse {
+                error: err.to_string(),
+            },
+        )
+            .into_response(),
+    }
 }
 
 pub async fn toggle_todo(
     Path(id): Path<String>,
     State(todo_service): State<TodoServiceImpl>,
 ) -> impl IntoResponse {
-    let mut todo = todo_service.get(id).await.unwrap();
-    todo.completed = !todo.completed;
-    todo.updated = get_timestamp();
-    todo_service.update(&todo).await.unwrap();
+    let result = todo_service.get(id).await;
 
-    EmptyResponse {}
+    match result {
+        Ok(mut todo) => {
+            todo.completed = !todo.completed;
+            todo.updated = get_timestamp();
+            let result = todo_service.update(&todo).await;
+            match result {
+                Ok(_a) => (EmptyResponse {}).into_response(),
+                Err(err) => (
+                    StatusCode::OK,
+                    [("HX-Retarget", "#toggle-error"), ("HX-Reswap", "innerHTML")],
+                    ToggleTodoErrorResponse {
+                        error: err.to_string(),
+                    },
+                )
+                    .into_response(),
+            }
+        }
+        Err(err) => (ToggleTodoErrorResponse {
+            error: err.to_string(),
+        })
+        .into_response(),
+    }
 }
