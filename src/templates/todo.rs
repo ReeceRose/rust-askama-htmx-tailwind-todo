@@ -8,3 +8,9 @@ use crate::models::Todo;
 pub struct ListTodoResponse {
     pub todos: Vec<Todo>,
 }
+
+#[derive(Template)]
+#[template(path = "todo/list-error.html")]
+pub struct ListTodoErrorResponse {
+    pub error: String,
+}

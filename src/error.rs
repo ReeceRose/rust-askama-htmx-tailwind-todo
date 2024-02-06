@@ -3,7 +3,6 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use thiserror::Error;
-use tokio::sync::oneshot::error;
 
 // TODO: refactor to remove error?
 // Make our own error that wraps `anyhow::Error`.
@@ -33,16 +32,40 @@ where
 
 #[derive(Error, Debug)]
 pub enum TodoError {
-    #[error("No")]
+    #[error("Todo not found.")]
     NotFound,
-    #[error("No")]
+    #[error("Failed to get todos from database.")]
     FailedToGetLock,
-    #[error("")]
+    #[error("Failed to get todos.")]
     FailedToGet,
-    #[error("")]
+    #[error("Failed to create todo. Please try again.")]
     FailedToCreate,
-    #[error("")]
+    #[error("Failed to update todo. Please try again.")]
     FailedToUpdate,
-    #[error("")]
+    #[error("Failed to delete todo. Please try again.")]
     FailedToDelete,
 }
+
+// impl IntoResponse for TodoError {
+//     fn into_response(self) -> Response {
+//         let mut target = "this";
+//         match self {
+//             Self::FailedToCreate => {}
+//             Self::FailedToDelete => {}
+//             Self::FailedToUpdate => {}
+//             Self::FailedToGet => target = "#load-error",
+//             Self::FailedToGetLock => {}
+//             Self::NotFound => {}
+//         }
+//         (
+//             StatusCode::OK,
+//             [
+//                 ("HX-Retarget", target),
+//                 ("HX-Reswap", "innerHTML"),
+//                 ("content-type", "text/html"),
+//             ],
+//             format!("Something went wrong: {}", self),
+//         )
+//             .into_response()
+//     }
+// }
