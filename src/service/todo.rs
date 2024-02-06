@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::{
     error::TodoError,
-    models::Todo,
+    models::todo::Todo,
     repository::todo::{Repo, TodoRepo},
 };
 

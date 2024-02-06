@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::{
     error::TodoError,
-    models::{SharedState, Todo},
+    models::{app_state::SharedState, todo::Todo},
 };
 
 // TODO: refactor to use an in-memory db?

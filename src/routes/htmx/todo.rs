@@ -1,5 +1,5 @@
 use crate::{
-    models::TodoRequest,
+    models::todo::TodoRequest,
     service::todo::{TodoService, TodoServiceImpl},
     templates::{
         index::EmptyResponse,

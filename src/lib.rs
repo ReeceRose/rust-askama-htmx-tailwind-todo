@@ -9,9 +9,12 @@ mod utils;
 
 use axum::{routing::get, Router};
 
-use models::SharedState;
+use models::app_state::SharedState;
 use repository::todo::{Repo, TodoRepo};
-use routes::htmx::index::{create_htmx_routes, get_index};
+use routes::{
+    htmx::index::{create_htmx_routes, get_index},
+    json::index::create_json_routes,
+};
 use service::todo::{TodoService, TodoServiceImpl};
 use tokio::net::TcpListener;
 use tower_http::{services::ServeDir, trace::TraceLayer};
@@ -22,12 +25,11 @@ pub fn app() -> Router {
     let todo_repo = TodoRepo::new(SharedState::default());
     let todo_service = TodoServiceImpl::new(todo_repo);
 
-    let htmx_routes = create_htmx_routes();
-
     Router::new()
         .nest_service("/assets", ServeDir::new("assets"))
         .route("/", get(get_index))
-        .nest("/htmx-api", htmx_routes)
+        .nest("/htmx-api", create_htmx_routes())
+        .nest("/json-api", create_json_routes())
         .layer(TraceLayer::new_for_http())
         .with_state(todo_service)
 }

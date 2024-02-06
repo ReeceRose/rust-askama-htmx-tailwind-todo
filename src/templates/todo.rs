@@ -1,7 +1,7 @@
 use askama::Template;
 use serde::Deserialize;
 
-use crate::models::Todo;
+use crate::models::todo::Todo;
 
 #[derive(Template, Deserialize)]
 #[template(path = "todo/list.html")]
