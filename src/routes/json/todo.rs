@@ -14,7 +14,7 @@ use axum::{
     Json,
 };
 
-pub async fn get_todos(State(todo_service): State<TodoServiceImpl>) -> impl IntoResponse {
+pub async fn get_todos(State(todo_service): State<TodoServiceImpl>) -> Json<ListTodosResponse> {
     let result = todo_service.all().await;
 
     match result {
@@ -29,7 +29,7 @@ pub async fn get_todos(State(todo_service): State<TodoServiceImpl>) -> impl Into
 pub async fn post_todo(
     State(mut todo_service): State<TodoServiceImpl>,
     Json(todo): Json<TodoRequest>,
-) -> impl IntoResponse {
+) -> Json<BaseResponse> {
     let result = todo_service.create(todo.text).await;
 
     match result {
@@ -44,7 +44,7 @@ pub async fn post_todo(
 pub async fn delete_todo(
     Path(id): Path<String>,
     State(todo_service): State<TodoServiceImpl>,
-) -> impl IntoResponse {
+) -> Json<BaseResponse> {
     let result = todo_service.delete(id).await;
 
     match result {
@@ -59,7 +59,7 @@ pub async fn delete_todo(
 pub async fn toggle_todo(
     Path(id): Path<String>,
     State(todo_service): State<TodoServiceImpl>,
-) -> impl IntoResponse {
+) -> Json<BaseResponse> {
     let result = todo_service.get(id).await;
 
     match result {
