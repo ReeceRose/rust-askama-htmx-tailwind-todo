@@ -1,6 +1,6 @@
 use crate::{
     models::{
-        response::BaseResponse,
+        response::{BaseResponse, Json},
         todo::{ListTodosResponse, TodoRequest},
     },
     service::todo::{TodoService, TodoServiceImpl},
@@ -10,8 +10,6 @@ use crate::{
 use axum::{
     extract::{Path, State},
     http::StatusCode,
-    response::IntoResponse,
-    Json,
 };
 
 pub async fn get_todos(State(todo_service): State<TodoServiceImpl>) -> Json<ListTodosResponse> {

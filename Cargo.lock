@@ -753,6 +753,7 @@ dependencies = [
  "askama_axum",
  "axum",
  "serde",
+ "serde_json",
  "thiserror",
  "tokio",
  "tower-http",

@@ -1,9 +1,8 @@
+mod error;
+mod models;
 mod repository;
 mod routes;
 mod service;
-
-mod error;
-mod models;
 mod templates;
 mod utils;
 
