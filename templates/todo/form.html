@@ -1,6 +1,7 @@
 <form
   hx-on="htmx:after-request: this.reset()"
-  hx-post="/htmx-api/todo"
+  hx-post="/api/todo"
+  hx-ext="json-enc"
   hx-target="#todo-list"
   hx-swap="innerHTML"
   class="max-w-md"

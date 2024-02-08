@@ -7,6 +7,7 @@ mod templates;
 mod utils;
 
 use axum::{routing::get, Router};
+use routes::{create_routes, get_index};
 use sqlx::sqlite::SqlitePool;
 use std::env::var;
 use tokio::net::TcpListener;
@@ -15,10 +16,6 @@ use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use repository::todo::{Repo, TodoRepo};
-use routes::{
-    htmx::index::{create_htmx_routes, get_index},
-    json::index::create_json_routes,
-};
 use service::todo::{TodoService, TodoServiceImpl};
 
 pub async fn app() -> Result<Router, anyhow::Error> {
@@ -38,8 +35,7 @@ pub async fn app() -> Result<Router, anyhow::Error> {
     Ok(Router::new()
         .nest_service("/assets", ServeDir::new("assets"))
         .route("/", get(get_index))
-        .nest("/htmx-api", create_htmx_routes())
-        .nest("/json-api", create_json_routes())
+        .nest("/api", create_routes())
         .layer(TraceLayer::new_for_http())
         .with_state(todo_service))
 }

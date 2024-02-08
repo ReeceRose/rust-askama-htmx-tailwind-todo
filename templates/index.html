@@ -18,7 +18,8 @@
     <div id="toggle-error"></div>
     <div
       id="todo-list"
-      hx-get="/htmx-api/todo"
+      hx-get="/api/todo"
+      hx-ext="json-enc"
       hx-target="this"
       hx-trigger="load"
       hx-swap="outerHTML"
