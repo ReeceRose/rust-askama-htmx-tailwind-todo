@@ -57,6 +57,8 @@ cp ./target/$(xx-cargo --print-target-triple)/release/$APP_NAME /bin/server
 xx-verify /bin/server
 EOF
 
+RUN chmod 777 /app/todos.db
+
 ################################################################################
 # Create a new stage for running the application that contains the minimal
 # runtime dependencies for the application. This often uses a different base
@@ -86,7 +88,9 @@ USER appuser
 COPY --from=build /bin/server /bin/
 # Copy any static assets.
 COPY --from=build /app/assets /assets/
-COPY --from=build /app/todos.db /bin/
+COPY --chown=appuser --from=build /app/todos.db /db/
+
+ENV DATABASE_URL=/db/todos.db
 
 # Expose the port that the application listens on.
 EXPOSE 3000

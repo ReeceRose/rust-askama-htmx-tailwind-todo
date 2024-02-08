@@ -8,6 +8,7 @@ mod utils;
 
 use axum::{routing::get, Router};
 use sqlx::sqlite::SqlitePool;
+use std::env::var;
 use tokio::net::TcpListener;
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing::info;
@@ -21,7 +22,10 @@ use routes::{
 use service::todo::{TodoService, TodoServiceImpl};
 
 pub async fn app() -> Result<Router, anyhow::Error> {
-    let pool = SqlitePool::connect("sqlite:todos.db")
+    // let database_url = env!("DATABASE_URL")
+    let database_url = var("DATABASE_URL").unwrap_or("sqlite:todos.db".to_string());
+
+    let pool = SqlitePool::connect(&database_url)
         .await
         .expect("Failed to open database connection");
     sqlx::migrate!()
