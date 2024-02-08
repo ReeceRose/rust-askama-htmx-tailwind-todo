@@ -89,9 +89,9 @@ USER appuser
 COPY --from=build /bin/server /bin/
 # Copy any static assets.
 COPY --from=build /app/assets /assets/
-COPY --chown=appuser --from=build /app/todos.db /db/
+COPY --chown=appuser --from=build /app/todos.db /bin/
 
-ENV DATABASE_URL=sqlite:/db/todos.db
+ENV DATABASE_URL=sqlite:/bin/todos.db
 
 # Expose the port that the application listens on.
 EXPOSE 3000
