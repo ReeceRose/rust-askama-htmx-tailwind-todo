@@ -32,8 +32,6 @@ ARG TARGETPLATFORM
 # Install cross compilation build dependencies.
 RUN xx-apk add --no-cache musl-dev gcc
 
-ENV DATABASE_URL=/app/todos.db
-
 # Build the application.
 # Leverage a cache mount to /usr/local/cargo/registry/
 # for downloaded dependencies, a cache mount to /usr/local/cargo/git/db
@@ -54,7 +52,7 @@ RUN --mount=type=cache,target=/app/target/,id=rust-cache-${APP_NAME}-${TARGETPLA
     --mount=type=bind,source=Cargo.lock,target=Cargo.lock \
     <<EOF
 set -e
-xx-cargo build --locked --release --target-dir ./target
+DATABASE_URL=/app/todos.db xx-cargo build --locked --release --target-dir ./target
 cp ./target/$(xx-cargo --print-target-triple)/release/$APP_NAME /bin/server
 xx-verify /bin/server
 EOF
