@@ -45,6 +45,10 @@ impl TodoService for TodoServiceImpl {
     }
 
     async fn create(&mut self, text: String) -> Result<Todo, TodoError> {
+        if text.is_empty() {
+            return Err(TodoError::EmptyTodo);
+        }
+
         let todo = Todo::new(text);
         let result = self.repository.create(&todo).await;
         match result {

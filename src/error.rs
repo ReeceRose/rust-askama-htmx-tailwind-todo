@@ -4,8 +4,6 @@ use thiserror::Error;
 pub enum TodoError {
     #[error("Todo not found.")]
     NotFound,
-    #[error("Failed to get todos from database.")]
-    FailedToGetLock,
     #[error("Failed to get todos.")]
     FailedToGet,
     #[error("Failed to create todo. Please try again.")]
@@ -14,4 +12,6 @@ pub enum TodoError {
     FailedToUpdate,
     #[error("Failed to delete todo. Please try again.")]
     FailedToDelete,
+    #[error("Failed to create todo. Empty todo.")]
+    EmptyTodo,
 }

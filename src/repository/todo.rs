@@ -30,7 +30,7 @@ impl Repo for TodoRepo {
             r#"
                 SELECT id, created, updated, text, completed
                 FROM todos
-                ORDER BY completed
+                ORDER BY completed, updated DESC
             "#
         )
         .fetch_all(&self.database)

@@ -86,6 +86,7 @@ USER appuser
 COPY --from=build /bin/server /bin/
 # Copy any static assets.
 COPY --from=build /app/assets /assets/
+COPY --from=build /app/todos.db /bin/
 
 # Expose the port that the application listens on.
 EXPOSE 3000
