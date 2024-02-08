@@ -21,6 +21,7 @@ WORKDIR /app
 # Copy cross compilation utilities from the xx stage.
 COPY --from=xx / /
 COPY . .
+COPY .sqlx/ /
 
 # Install host build dependencies.
 RUN apk add --no-cache clang lld musl-dev git file
@@ -90,6 +91,7 @@ COPY --from=build /bin/server /bin/
 # Copy any static assets.
 COPY --from=build /app/assets /assets/
 COPY --chown=appuser --from=build /app/todos.db /db/
+COPY --chown=appuser --from=build /app/.sqlx/ /db/.sqlx/
 
 ENV DATABASE_URL=/db/todos.db
 
