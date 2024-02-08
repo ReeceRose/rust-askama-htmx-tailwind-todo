@@ -45,14 +45,14 @@ RUN xx-apk add --no-cache musl-dev gcc
 #     --mount=type=cache,target=/app/target/,id=rust-cache-${APP_NAME}-${TARGETPLATFORM} \
 #     --mount=type=cache,target=/usr/local/cargo/git/db \
 #     --mount=type=cache,target=/usr/local/cargo/registry/ \
-RUN --mount=type=cache,target=/app/target/,id=rust-cache-${APP_NAME}-${TARGETPLATFORM} \
+RUN DATABASE_URL=/app/todos.db --mount=type=cache,target=/app/target/,id=rust-cache-${APP_NAME}-${TARGETPLATFORM} \
     --mount=type=cache,target=/usr/local/cargo/git/db,id=cargo-git-db \
     --mount=type=cache,target=/usr/local/cargo/registry/,id=cargo-registry \
     --mount=type=bind,source=Cargo.toml,target=Cargo.toml \
     --mount=type=bind,source=Cargo.lock,target=Cargo.lock \
     <<EOF
 set -e
-DATABASE_URL=/app/todos.db xx-cargo build --locked --release --target-dir ./target
+xx-cargo build --locked --release --target-dir ./target
 cp ./target/$(xx-cargo --print-target-triple)/release/$APP_NAME /bin/server
 xx-verify /bin/server
 EOF
