@@ -1,14 +1,13 @@
+use crate::utils::get_timestamp;
 use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::utils::get_timestamp;
-
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Todo {
-    created: u128,
-    pub updated: u128,
-    pub id: Uuid,
+    pub id: String,
+    pub created: i64,
+    pub updated: i64,
     pub text: String,
     pub completed: bool,
 }
@@ -17,9 +16,9 @@ impl Todo {
     pub fn new(text: String) -> Self {
         let timestamp = get_timestamp();
         Self {
+            id: Uuid::new_v4().to_string(),
             created: timestamp,
             updated: timestamp,
-            id: Uuid::new_v4(),
             text,
             completed: false,
         }

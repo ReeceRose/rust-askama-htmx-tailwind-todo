@@ -7,30 +7,38 @@ mod templates;
 mod utils;
 
 use axum::{routing::get, Router};
+use sqlx::sqlite::SqlitePool;
+use tokio::net::TcpListener;
+use tower_http::{services::ServeDir, trace::TraceLayer};
+use tracing::info;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use models::app_state::SharedState;
 use repository::todo::{Repo, TodoRepo};
 use routes::{
     htmx::index::{create_htmx_routes, get_index},
     json::index::create_json_routes,
 };
 use service::todo::{TodoService, TodoServiceImpl};
-use tokio::net::TcpListener;
-use tower_http::{services::ServeDir, trace::TraceLayer};
-use tracing::info;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-pub fn app() -> Router {
-    let todo_repo = TodoRepo::new(SharedState::default());
+pub async fn app() -> Result<Router, anyhow::Error> {
+    let pool = SqlitePool::connect("sqlite:todos.db")
+        .await
+        .expect("Failed to open database connection");
+    sqlx::migrate!()
+        .run(&pool)
+        .await
+        .expect("Failed to create database pool");
+
+    let todo_repo = TodoRepo::new(pool);
     let todo_service = TodoServiceImpl::new(todo_repo);
 
-    Router::new()
+    Ok(Router::new()
         .nest_service("/assets", ServeDir::new("assets"))
         .route("/", get(get_index))
         .nest("/htmx-api", create_htmx_routes())
         .nest("/json-api", create_json_routes())
         .layer(TraceLayer::new_for_http())
-        .with_state(todo_service)
+        .with_state(todo_service))
 }
 
 pub async fn run() {
@@ -48,5 +56,5 @@ pub async fn run() {
     info!("listening on {}", addr);
 
     let listener = TcpListener::bind(addr).await.unwrap();
-    axum::serve(listener, app()).await.unwrap();
+    axum::serve(listener, app().await.unwrap()).await.unwrap();
 }

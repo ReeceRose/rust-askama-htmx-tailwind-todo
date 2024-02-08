@@ -1,5 +1,3 @@
-use std::sync::{Arc, RwLock};
-
 use super::todo::Todo;
 
 pub struct AppState {
@@ -11,5 +9,3 @@ impl Default for AppState {
         Self { todos: vec![] }
     }
 }
-
-pub type SharedState = Arc<RwLock<AppState>>;

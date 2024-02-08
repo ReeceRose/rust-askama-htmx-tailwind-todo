@@ -1,114 +1,122 @@
 use anyhow::Result;
+use sqlx::{Pool, Sqlite};
 
-use crate::{
-    error::TodoError,
-    models::{app_state::SharedState, todo::Todo},
-};
-
-// TODO: refactor to use an in-memory db?
+use crate::{error::TodoError, models::todo::Todo};
 
 // TODO: Refactor name
 #[derive(Clone)]
 pub struct TodoRepo {
-    state: SharedState,
+    database: Pool<Sqlite>,
 }
 
 // TODO: Refactor name
 pub trait Repo {
-    fn new(shared_state: SharedState) -> Self; // TOOD: borrow
-    fn all(&self) -> Result<Vec<Todo>, TodoError>;
-    fn get(&self, id: String) -> Result<Todo, TodoError>;
-    fn create(&mut self, todo: &Todo) -> Result<Todo, TodoError>;
-    fn update(&self, todo: &Todo) -> Result<bool, TodoError>; // TODO: update return to return Todo
-    fn delete(&self, id: String) -> Result<bool, TodoError>;
-}
-
-impl TodoRepo {
-    fn get_index(&self, id: String) -> Option<usize> {
-        let state = self.state.read().unwrap();
-        return Some(
-            state
-                .todos
-                .iter()
-                .position(|todo| todo.id.to_string() == id)
-                .unwrap(),
-        );
-    }
+    fn new(database: Pool<Sqlite>) -> Self;
+    async fn all(&self) -> Result<Vec<Todo>, TodoError>;
+    async fn get(&self, id: String) -> Result<Todo, TodoError>;
+    async fn create(&mut self, todo: &Todo) -> Result<Todo, TodoError>;
+    async fn update(&self, todo: &Todo) -> Result<bool, TodoError>; // TODO: update return to return Todo
+    async fn delete(&self, id: String) -> Result<bool, TodoError>;
 }
 
 impl Repo for TodoRepo {
-    fn new(shared_state: SharedState) -> Self {
-        TodoRepo {
-            state: shared_state,
+    fn new(database: Pool<Sqlite>) -> Self {
+        TodoRepo { database }
+    }
+
+    async fn all(&self) -> Result<Vec<Todo>, TodoError> {
+        let result = sqlx::query_as!(
+            Todo,
+            r#"
+                SELECT id, created, updated, text, completed
+                FROM todos
+                ORDER BY completed
+            "#
+        )
+        .fetch_all(&self.database)
+        .await;
+
+        match result {
+            Ok(todos) => Ok(todos),
+            Err(_err) => Err(TodoError::FailedToGet),
         }
     }
 
-    fn all(&self) -> Result<Vec<Todo>, TodoError> {
-        let read_state = self.state.read();
-        match read_state {
-            Ok(state) => Ok(state.todos.clone()),
-            Err(_err) => Err(TodoError::FailedToGetLock),
+    async fn get(&self, id: String) -> Result<Todo, TodoError> {
+        let result = sqlx::query_as!(
+            Todo,
+            r#"
+                SELECT id, created, updated, text, completed
+                FROM todos
+                WHERE id = ?1
+            "#,
+            id
+        )
+        .fetch_optional(&self.database)
+        .await;
+
+        match result {
+            Ok(result) => match result {
+                Some(todo) => Ok(todo),
+                None => Err(TodoError::NotFound),
+            },
+            Err(_err) => Err(TodoError::FailedToGet),
         }
     }
 
-    fn get(&self, id: String) -> Result<Todo, TodoError> {
-        let index = self.get_index(id);
-        match index {
-            Some(index) => {
-                let read_state = self.state.read();
-                match read_state {
-                    Ok(state) => {
-                        if let Some(todo) = state.todos.get(index) {
-                            return Ok(todo.clone());
-                        }
-                        return Err(TodoError::NotFound);
-                    }
-                    Err(_err) => Err(TodoError::FailedToGetLock),
-                }
-            }
-            None => Err(TodoError::NotFound),
+    async fn create(&mut self, todo: &Todo) -> Result<Todo, TodoError> {
+        let result = sqlx::query!(
+            r#"
+                INSERT INTO todos(id, created, updated, text, completed)
+                VALUES (?1, ?2, ?3, ?4, ?5)
+            "#,
+            todo.id,
+            todo.created,
+            todo.updated,
+            todo.text,
+            todo.completed
+        )
+        .execute(&self.database)
+        .await;
+
+        match result {
+            Ok(_result) => Ok(todo.clone()),
+            Err(_err) => Err(TodoError::FailedToGet),
         }
     }
 
-    fn create(&mut self, todo: &Todo) -> Result<Todo, TodoError> {
-        let write_state = self.state.write();
-        return match write_state {
-            Ok(mut state) => {
-                state.todos.push(todo.clone());
-                Ok(todo.clone())
-            }
-            Err(_err) => Err(TodoError::FailedToGetLock),
-        };
-    }
-
-    fn update(&self, todo: &Todo) -> Result<bool, TodoError> {
-        let id = todo.to_owned().id.to_string();
-        let index = self.get_index(id.to_owned());
-        match index {
-            Some(index) => {
-                let write_state = self.state.write();
-                if let Ok(mut state) = write_state {
-                    state.todos.splice(index..=index, Some(todo.to_owned())); // TODO: refactor to_owned?
-                    return Ok(true);
-                }
-                return Err(TodoError::FailedToGetLock);
-            }
-            None => Err(TodoError::NotFound),
+    async fn update(&self, todo: &Todo) -> Result<bool, TodoError> {
+        let result = sqlx::query!(
+            r#"
+                UPDATE todos SET updated = ?1, text = ?2, completed = ?3
+                WHERE id = $4
+            "#,
+            todo.updated,
+            todo.text,
+            todo.completed,
+            todo.id
+        )
+        .execute(&self.database)
+        .await;
+        match result {
+            Ok(_result) => Ok(true),
+            Err(_err) => Err(TodoError::FailedToUpdate),
         }
     }
 
-    fn delete(&self, id: String) -> Result<bool, TodoError> {
-        let index = self.get_index(id);
-        match index {
-            Some(index) => {
-                let write_state = self.state.write();
-                if let Ok(mut state) = write_state {
-                    state.todos.remove(index);
-                    return Ok(true);
-                }
-                return Err(TodoError::NotFound);
-            }
-            None => Err(TodoError::NotFound),
+    async fn delete(&self, id: String) -> Result<bool, TodoError> {
+        let result = sqlx::query!(
+            r#"
+                DELETE FROM todos
+                WHERE id = $1
+            "#,
+            id
+        )
+        .execute(&self.database)
+        .await;
+        match result {
+            Ok(_result) => Ok(true),
+            Err(_err) => Err(TodoError::FailedToUpdate),
         }
     }
 }

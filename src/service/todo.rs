@@ -29,7 +29,7 @@ impl TodoService for TodoServiceImpl {
     }
 
     async fn all(&self) -> Result<Vec<Todo>, TodoError> {
-        let result = self.repository.all();
+        let result = self.repository.all().await;
         match result {
             Ok(todos) => Ok(todos),
             Err(_err) => Err(TodoError::FailedToGet),
@@ -37,7 +37,7 @@ impl TodoService for TodoServiceImpl {
     }
 
     async fn get(&self, id: String) -> Result<Todo, TodoError> {
-        let result = self.repository.get(id);
+        let result = self.repository.get(id).await;
         match result {
             Ok(todo) => Ok(todo),
             Err(_err) => Err(TodoError::FailedToGet),
@@ -46,7 +46,7 @@ impl TodoService for TodoServiceImpl {
 
     async fn create(&mut self, text: String) -> Result<Todo, TodoError> {
         let todo = Todo::new(text);
-        let result = self.repository.create(&todo);
+        let result = self.repository.create(&todo).await;
         match result {
             Ok(todo) => Ok(todo),
             Err(_err) => Err(TodoError::FailedToCreate),
@@ -54,7 +54,7 @@ impl TodoService for TodoServiceImpl {
     }
 
     async fn update(&self, todo: &Todo) -> Result<Todo, TodoError> {
-        let result = self.repository.update(todo);
+        let result = self.repository.update(todo).await;
         match result {
             Ok(_updated) => Ok(todo.clone()),
             Err(_err) => Err(TodoError::FailedToUpdate),
@@ -62,7 +62,7 @@ impl TodoService for TodoServiceImpl {
     }
 
     async fn delete(&self, id: String) -> Result<bool, TodoError> {
-        let result = self.repository.delete(id);
+        let result = self.repository.delete(id).await;
         match result {
             Ok(deleted) => Ok(deleted),
             Err(_err) => Err(TodoError::FailedToDelete),
