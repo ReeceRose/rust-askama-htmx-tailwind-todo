@@ -24,7 +24,7 @@ use service::todo::{TodoService, TodoServiceImpl};
 pub async fn app() -> Result<Router, anyhow::Error> {
     // let database_url = env!("DATABASE_URL")
     let database_url = var("DATABASE_URL").unwrap_or("sqlite:todos.db".to_string());
-
+    println!("db url: ${}", database_url);
     let pool = SqlitePool::connect(&database_url)
         .await
         .expect("Failed to open database connection");
