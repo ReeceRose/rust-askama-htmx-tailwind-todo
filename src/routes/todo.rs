@@ -17,15 +17,14 @@ use crate::{
 use askama_axum::IntoResponse;
 use axum::{
     extract::{Path, State},
-    http::{HeaderMap, StatusCode},
+    http::StatusCode,
+    Extension,
 };
 
 pub async fn get_todos(
-    headers: HeaderMap,
+    Extension(htmx): Extension<bool>,
     State(todo_service): State<TodoServiceImpl>,
 ) -> impl IntoResponse {
-    let htmx = headers.contains_key("Hx-Request");
-
     let result = todo_service.all().await;
     if htmx {
         return match result {
@@ -52,11 +51,10 @@ pub async fn get_todos(
 }
 
 pub async fn post_todo(
-    headers: HeaderMap,
+    Extension(htmx): Extension<bool>,
     State(mut todo_service): State<TodoServiceImpl>,
     Json(todo): Json<TodoRequest>,
 ) -> impl IntoResponse {
-    let htmx = headers.contains_key("Hx-Request");
     let result = todo_service.create(todo.text).await;
 
     if htmx {
@@ -87,12 +85,10 @@ pub async fn post_todo(
 }
 
 pub async fn delete_todo(
-    headers: HeaderMap,
+    Extension(htmx): Extension<bool>,
     Path(id): Path<String>,
     State(todo_service): State<TodoServiceImpl>,
 ) -> impl IntoResponse {
-    let htmx = headers.contains_key("HX-Request");
-
     let result = todo_service.delete(id).await;
 
     if htmx {
@@ -120,12 +116,10 @@ pub async fn delete_todo(
 }
 
 pub async fn toggle_todo(
-    headers: HeaderMap,
+    Extension(htmx): Extension<bool>,
     Path(id): Path<String>,
     State(todo_service): State<TodoServiceImpl>,
 ) -> impl IntoResponse {
-    let htmx = headers.contains_key("HX-Request");
-
     let result = todo_service.get(id).await;
 
     match result {

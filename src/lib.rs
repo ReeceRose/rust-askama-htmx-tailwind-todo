@@ -11,7 +11,7 @@ use routes::{create_routes, get_index};
 use sqlx::sqlite::SqlitePool;
 use std::env::var;
 use tokio::net::TcpListener;
-use tower_http::{services::ServeDir, trace::TraceLayer};
+use tower_http::{compression::CompressionLayer, services::ServeDir, trace::TraceLayer};
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -37,6 +37,7 @@ pub async fn app() -> Result<Router, anyhow::Error> {
         .route("/", get(get_index))
         .nest("/api", create_routes())
         .layer(TraceLayer::new_for_http())
+        .layer(CompressionLayer::new())
         .with_state(todo_service))
 }
 
