@@ -15,8 +15,8 @@ use tower_http::{compression::CompressionLayer, services::ServeDir, trace::Trace
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use repository::todo::{Repo, TodoRepo};
-use service::todo::{TodoService, TodoServiceImpl};
+use repository::todo::{TodoRepository, TodoRepositoryTrait};
+use service::todo::{TodoService, TodoServiceTrait};
 
 pub async fn app() -> Result<Router, anyhow::Error> {
     // let database_url = env!("DATABASE_URL")
@@ -29,8 +29,8 @@ pub async fn app() -> Result<Router, anyhow::Error> {
         .await
         .expect("Failed to create database pool");
 
-    let todo_repo = TodoRepo::new(pool);
-    let todo_service = TodoServiceImpl::new(todo_repo);
+    let todo_repo = TodoRepository::new(pool);
+    let todo_service = TodoService::new(todo_repo);
 
     Ok(Router::new()
         .nest_service("/assets", ServeDir::new("assets"))

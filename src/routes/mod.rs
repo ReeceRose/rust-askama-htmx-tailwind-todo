@@ -4,7 +4,7 @@ use axum::{
     Router,
 };
 
-use crate::{service::todo::TodoServiceImpl, templates::index::GetIndexResponse};
+use crate::{service::todo::TodoService, templates::index::GetIndexResponse};
 
 use self::{
     middleware::get_htmx_header,
@@ -18,9 +18,9 @@ pub async fn get_index() -> GetIndexResponse {
     GetIndexResponse {}
 }
 
-pub fn create_routes() -> Router<TodoServiceImpl> {
-    return Router::new()
+pub fn create_routes() -> Router<TodoService> {
+    Router::new()
         .route("/todo", get(get_todos).post(post_todo))
         .route("/todo/:id", delete(delete_todo).patch(toggle_todo))
-        .layer(from_fn(get_htmx_header));
+        .layer(from_fn(get_htmx_header))
 }

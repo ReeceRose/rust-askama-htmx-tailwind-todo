@@ -3,7 +3,7 @@ use crate::{
         response::{BaseResponse, Json},
         todo::{ListTodosResponse, TodoRequest},
     },
-    service::todo::{TodoService, TodoServiceImpl},
+    service::todo::{TodoService, TodoServiceTrait},
     templates::{
         index::EmptyResponse,
         todo::{
@@ -23,7 +23,7 @@ use axum::{
 
 pub async fn get_todos(
     Extension(htmx): Extension<bool>,
-    State(todo_service): State<TodoServiceImpl>,
+    State(todo_service): State<TodoService>,
 ) -> impl IntoResponse {
     let result = todo_service.all().await;
     if htmx {
@@ -52,7 +52,7 @@ pub async fn get_todos(
 
 pub async fn post_todo(
     Extension(htmx): Extension<bool>,
-    State(mut todo_service): State<TodoServiceImpl>,
+    State(mut todo_service): State<TodoService>,
     Json(todo): Json<TodoRequest>,
 ) -> impl IntoResponse {
     let result = todo_service.create(todo.text).await;
@@ -87,7 +87,7 @@ pub async fn post_todo(
 pub async fn delete_todo(
     Extension(htmx): Extension<bool>,
     Path(id): Path<String>,
-    State(todo_service): State<TodoServiceImpl>,
+    State(todo_service): State<TodoService>,
 ) -> impl IntoResponse {
     let result = todo_service.delete(id).await;
 
@@ -118,7 +118,7 @@ pub async fn delete_todo(
 pub async fn toggle_todo(
     Extension(htmx): Extension<bool>,
     Path(id): Path<String>,
-    State(todo_service): State<TodoServiceImpl>,
+    State(todo_service): State<TodoService>,
 ) -> impl IntoResponse {
     let result = todo_service.get(id).await;
 

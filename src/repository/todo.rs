@@ -1,16 +1,15 @@
 use anyhow::Result;
 use sqlx::{Pool, Sqlite};
+use tracing::error;
 
 use crate::{error::TodoError, models::todo::Todo};
 
-// TODO: Refactor name
 #[derive(Clone)]
-pub struct TodoRepo {
+pub struct TodoRepository {
     database: Pool<Sqlite>,
 }
 
-// TODO: Refactor name
-pub trait Repo {
+pub trait TodoRepositoryTrait {
     fn new(database: Pool<Sqlite>) -> Self;
     async fn all(&self) -> Result<Vec<Todo>, TodoError>;
     async fn get(&self, id: String) -> Result<Todo, TodoError>;
@@ -19,9 +18,9 @@ pub trait Repo {
     async fn delete(&self, id: String) -> Result<bool, TodoError>;
 }
 
-impl Repo for TodoRepo {
+impl TodoRepositoryTrait for TodoRepository {
     fn new(database: Pool<Sqlite>) -> Self {
-        TodoRepo { database }
+        TodoRepository { database }
     }
 
     async fn all(&self) -> Result<Vec<Todo>, TodoError> {
@@ -38,7 +37,10 @@ impl Repo for TodoRepo {
 
         match result {
             Ok(todos) => Ok(todos),
-            Err(_err) => Err(TodoError::FailedToGet),
+            Err(err) => {
+                error!("Failed to get all todos from database: {}", err);
+                Err(TodoError::FailedToGet)
+            }
         }
     }
 
@@ -60,7 +62,10 @@ impl Repo for TodoRepo {
                 Some(todo) => Ok(todo),
                 None => Err(TodoError::NotFound),
             },
-            Err(_err) => Err(TodoError::FailedToGet),
+            Err(err) => {
+                error!("Failed to get todo ({}) from database: {}", id, err);
+                Err(TodoError::FailedToGet)
+            }
         }
     }
 
@@ -81,7 +86,10 @@ impl Repo for TodoRepo {
 
         match result {
             Ok(_result) => Ok(todo.clone()),
-            Err(_err) => Err(TodoError::FailedToGet),
+            Err(err) => {
+                error!("Failed to create todo ({}) in database: {}", todo.text, err);
+                Err(TodoError::FailedToGet)
+            }
         }
     }
 
@@ -100,7 +108,10 @@ impl Repo for TodoRepo {
         .await;
         match result {
             Ok(_result) => Ok(true),
-            Err(_err) => Err(TodoError::FailedToUpdate),
+            Err(err) => {
+                error!("Failed to update todo ({}) in database: {}", todo.id, err);
+                Err(TodoError::FailedToUpdate)
+            }
         }
     }
 
@@ -116,7 +127,10 @@ impl Repo for TodoRepo {
         .await;
         match result {
             Ok(_result) => Ok(true),
-            Err(_err) => Err(TodoError::FailedToUpdate),
+            Err(err) => {
+                error!("Failed to delete todo ({}) from database: {}", id, err);
+                Err(TodoError::FailedToUpdate)
+            }
         }
     }
 }

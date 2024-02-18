@@ -12,5 +12,6 @@ pub async fn get_htmx_header(
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     let htmx = headers.contains_key("HX-Request");
     req.extensions_mut().insert(htmx);
+
     Ok(next.run(req).await)
 }

@@ -3,17 +3,16 @@ use anyhow::Result;
 use crate::{
     error::TodoError,
     models::todo::Todo,
-    repository::todo::{Repo, TodoRepo},
+    repository::todo::{TodoRepository, TodoRepositoryTrait},
 };
 
 #[derive(Clone)]
-pub struct TodoServiceImpl {
-    repository: TodoRepo,
+pub struct TodoService {
+    repository: TodoRepository,
 }
 
-// TODO: Refactor return types
-pub trait TodoService {
-    fn new(repository: TodoRepo) -> Self; // TODO: borrow?
+pub trait TodoServiceTrait {
+    fn new(repository: TodoRepository) -> Self; // TODO: borrow?
     async fn all(&self) -> Result<Vec<Todo>, TodoError>;
     async fn get(&self, id: String) -> Result<Todo, TodoError>;
     async fn create(&mut self, text: String) -> Result<Todo, TodoError>;
@@ -21,10 +20,8 @@ pub trait TodoService {
     async fn delete(&self, id: String) -> Result<bool, TodoError>;
 }
 
-// TODO: add some more logging
-
-impl TodoService for TodoServiceImpl {
-    fn new(repository: TodoRepo) -> Self {
+impl TodoServiceTrait for TodoService {
+    fn new(repository: TodoRepository) -> Self {
         Self { repository }
     }
 
