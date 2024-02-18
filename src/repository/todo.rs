@@ -14,7 +14,7 @@ pub trait TodoRepositoryTrait {
     async fn all(&self) -> Result<Vec<Todo>, TodoError>;
     async fn get(&self, id: String) -> Result<Todo, TodoError>;
     async fn create(&mut self, todo: &Todo) -> Result<Todo, TodoError>;
-    async fn update(&self, todo: &Todo) -> Result<bool, TodoError>; // TODO: update return to return Todo
+    async fn update(&self, todo: &Todo) -> Result<bool, TodoError>;
     async fn delete(&self, id: String) -> Result<bool, TodoError>;
 }
 

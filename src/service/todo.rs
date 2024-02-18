@@ -12,7 +12,7 @@ pub struct TodoService {
 }
 
 pub trait TodoServiceTrait {
-    fn new(repository: TodoRepository) -> Self; // TODO: borrow?
+    fn new(repository: TodoRepository) -> Self;
     async fn all(&self) -> Result<Vec<Todo>, TodoError>;
     async fn get(&self, id: String) -> Result<Todo, TodoError>;
     async fn create(&mut self, text: String) -> Result<Todo, TodoError>;

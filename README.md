@@ -15,7 +15,6 @@ Boilerplate code to demonstrate how an Axum API would incorporate both HTMX and 
 4. [PNPM](https://pnpm.io/installation)
    
 ### Configuring development environment
-
 To get a development build ready, run:
 ```bash
 make setup
